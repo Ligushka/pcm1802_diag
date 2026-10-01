@@ -1,0 +1,25 @@
+;
+; PCM1802 slot diagnostic for the RP2350B DualADC/DualPCM board
+;
+; SPDX-License-Identifier: BSD-3-Clause
+;
+
+; Same 40 MHz waveform the production dual_external_adc firmware side-sets
+; on GP20..GP22 (ADC1 clock, PCM1802 SCKI for both slots, ADC2 clock):
+; one PIO cycle high, one cycle low, with the PIO running at 80 MHz.
+.program clockgen
+.side_set 3
+.wrap_target
+	nop		side 7
+	nop		side 0
+.wrap
+
+; Period counter: X is decremented once per full period of the IN base pin.
+; The C code snapshots X with pio_sm_exec() to measure the frequency.
+.program edge_counter
+.wrap_target
+top:
+	wait 1 pin 0
+	wait 0 pin 0
+	jmp x-- top
+.wrap
